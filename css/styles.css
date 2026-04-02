@@ -1,6 +1,4 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Fredoka', sans-serif; -webkit-tap-highlight-color: transparent; }
-
-/* 🔥 BUGFIX: O dvh resolve o problema do navegador comendo a base da tela 🔥 */
 body { background-color: #060b19; background-size: cover; background-position: center; background-repeat: no-repeat; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; height: 100dvh; width: 100vw; overflow: hidden; user-select: none; touch-action: none; }
 body.bg-inicial { background-image: url('../assets/fundo.png'); }
 body.bg-mapa, body.bg-terra, body.bg-marte, body.bg-venus, body.bg-saturno, body.bg-jupiter { background-image: url('../assets/fundo-mapa.png'); }
@@ -29,10 +27,11 @@ body.bg-mapa, body.bg-terra, body.bg-marte, body.bg-venus, body.bg-saturno, body
 @keyframes comicFastIn { from { transform: translateX(100%) scale(0.8); opacity: 0; } to { transform: translateX(0) scale(1); opacity: 1; } }
 @keyframes flutuar1 { from { transform: translateY(0); } to { transform: translateY(-20px); } }
 
-/* 🔥 BUGFIX: Limite de altura para a tela inicial não esmagar para baixo 🔥 */
 .img-titulo { width: 90%; max-width: 380px; max-height: 25vh; object-fit: contain; z-index: 2; animation: flutuar1 3.5s infinite alternate ease-in-out; }
 .avatar-inicial { width: 340px; max-width: 90%; max-height: 40vh; object-fit: contain; margin: 10px 0 25px 0; z-index: 2; animation: flutuar1 4.5s infinite alternate ease-in-out; }
-.btn-iniciar-img { width: 280px; max-width: 85%; max-height: 15vh; object-fit: contain; cursor: pointer; transition: transform 0.1s; }
+
+/* 🔥 BUGFIX: z-index 100 e position relative impedem que as imagens vizinhas cubram o botão de Iniciar! 🔥 */
+.btn-iniciar-img { width: 280px; max-width: 85%; max-height: 15vh; object-fit: contain; cursor: pointer; transition: transform 0.1s; position: relative; z-index: 100; }
 .btn-iniciar-img:active { transform: scale(0.92); }
 
 @keyframes pulsoSuave { 0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(52, 152, 219, 0)); } 100% { transform: scale(1.06); filter: drop-shadow(0 0 20px rgba(52, 152, 219, 0.8)); } }
@@ -45,11 +44,8 @@ body.bg-mapa, body.bg-terra, body.bg-marte, body.bg-venus, body.bg-saturno, body
 .obj-fixo { position: absolute; z-index: 10; pointer-events: none; display: none; }
 #foguete-viajante { position: absolute; width: 120px; z-index: 20; pointer-events: none; transition: all 1.5s ease-in-out; transform: translate(-50%, -50%); display: none; }
 .foguete-voando { filter: drop-shadow(0 0 15px #ff9900); }
-
-/* 🔥 BUGFIX: Botão de voltar mais para cima (longe da barra do celular) 🔥 */
 .btn-voltar-fixo { position: absolute; bottom: 45px; left: 20px; width: 110px; cursor: pointer; z-index: 60; background: none; border: none; outline: none; transition: transform 0.1s ease; }
 .btn-voltar-fixo:active { transform: scale(0.92) translateY(4px); }
-
 
 /* LÓGICA DO GRID DO LABIRINTO */
 #container-labirinto-jogo { display: flex; flex-direction: column; align-items: center; justify-content: center; transform: scale(0.85); }
@@ -73,8 +69,6 @@ body.bg-mapa, body.bg-terra, body.bg-marte, body.bg-venus, body.bg-saturno, body
 .caixa-imagem img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
 .marca-x { position: absolute; color: #ff2a7a; font-size: 35px; font-weight: 900; transform: translate(-50%, -50%); pointer-events: none; text-shadow: 2px 2px 0 #fff; z-index: 15; }
 .hitbox { position: absolute; width: 44px; height: 44px; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
-
-/* 🔥 BUGFIX: Limite de altura para a caixa do paint não esmagar os botões 🔥 */
 .container-colorir { position: relative; width: 330px; height: 380px; max-height: 50vh; background: white; border: 4px solid white; border-radius: 15px; overflow: hidden; touch-action: none; flex-shrink: 0; }
 #paintCanvas { position: absolute; width: 100%; height: 100%; z-index: 5; touch-action: none; }
 #img-para-colorir { position: absolute; width: 100%; height: 100%; pointer-events: none; mix-blend-mode: multiply; z-index: 10; }
