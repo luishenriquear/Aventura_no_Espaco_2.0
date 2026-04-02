@@ -1,7 +1,14 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Fredoka', sans-serif; -webkit-tap-highlight-color: transparent; }
 body { background-color: #060b19; background-size: cover; background-position: center; background-repeat: no-repeat; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; height: 100dvh; width: 100vw; overflow: hidden; user-select: none; touch-action: none; }
+
+/* 🔥 BUGFIX: Fundos separados e restaurados com sucesso 🔥 */
 body.bg-inicial { background-image: url('../assets/fundo.png'); }
-body.bg-mapa, body.bg-terra, body.bg-marte, body.bg-venus, body.bg-saturno, body.bg-jupiter { background-image: url('../assets/fundo-mapa.png'); }
+body.bg-mapa { background-image: url('../assets/fundo-mapa.png'); }
+body.bg-terra { background-image: url('../assets/terra-fundo.png'); }
+body.bg-marte { background-image: url('../assets/marte-fundo.png'); }
+body.bg-venus { background-image: url('../assets/venus-fundo.png'); }
+body.bg-saturno { background-image: url('../assets/saturno-fundo.png'); }
+body.bg-jupiter { background-image: url('../assets/jupiter-fundo.png'); }
 
 #game-container { width: 100%; max-width: 600px; height: 100vh; height: 100dvh; position: relative; overflow: hidden; }
 .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
@@ -30,7 +37,6 @@ body.bg-mapa, body.bg-terra, body.bg-marte, body.bg-venus, body.bg-saturno, body
 .img-titulo { width: 90%; max-width: 380px; max-height: 25vh; object-fit: contain; z-index: 2; animation: flutuar1 3.5s infinite alternate ease-in-out; }
 .avatar-inicial { width: 340px; max-width: 90%; max-height: 40vh; object-fit: contain; margin: 10px 0 25px 0; z-index: 2; animation: flutuar1 4.5s infinite alternate ease-in-out; }
 
-/* 🔥 BUGFIX: z-index 100 e position relative impedem que as imagens vizinhas cubram o botão de Iniciar! 🔥 */
 .btn-iniciar-img { width: 280px; max-width: 85%; max-height: 15vh; object-fit: contain; cursor: pointer; transition: transform 0.1s; position: relative; z-index: 100; }
 .btn-iniciar-img:active { transform: scale(0.92); }
 
@@ -41,9 +47,18 @@ body.bg-mapa, body.bg-terra, body.bg-marte, body.bg-venus, body.bg-saturno, body
 .img-planeta { width: 100%; height: 100%; object-fit: contain; cursor: pointer; pointer-events: auto; }
 .bloqueado .img-planeta { filter: grayscale(100%) brightness(0.4); }
 .nome-fixo { position: absolute; transform: translate(-50%, -50%); font-weight: 900; font-size: 1.4rem; color: white; text-shadow: 2px 2px 0 #0a1f55; pointer-events: none; z-index: 6; }
+
+/* 🔥 BUGFIX: CSS das Bandeiras restaurado! Agora elas voltam a cobrir os planetas 🔥 */
 .obj-fixo { position: absolute; z-index: 10; pointer-events: none; display: none; }
+#b-terra { top: 55.6%; left: 14.2%; width: 157px; transform: translate(-50%, -50%) rotate(-12.7deg); }
+#b-marte { top: 25.4%; left: 14.4%; width: 97px; transform: translate(-50%, -50%) rotate(-13deg); }
+#b-venus { top: 41.4%; left: 57.9%; width: 143px; transform: translate(-50%, -50%) rotate(0.2deg); }
+#b-saturno { top: 66.3136%; left: 62.03%; width: 144.81px; transform: translate(-50%, -50%) rotate(-24.3deg); }
+#b-jupiter { top: 7.43867%; left: 59.471%; width: 208.567px; transform: translate(-50%, -50%) rotate(333deg); }
+
 #foguete-viajante { position: absolute; width: 120px; z-index: 20; pointer-events: none; transition: all 1.5s ease-in-out; transform: translate(-50%, -50%); display: none; }
 .foguete-voando { filter: drop-shadow(0 0 15px #ff9900); }
+
 .btn-voltar-fixo { position: absolute; bottom: 45px; left: 20px; width: 110px; cursor: pointer; z-index: 60; background: none; border: none; outline: none; transition: transform 0.1s ease; }
 .btn-voltar-fixo:active { transform: scale(0.92) translateY(4px); }
 
