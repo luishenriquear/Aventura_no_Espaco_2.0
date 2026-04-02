@@ -10,7 +10,7 @@ let paginaAtual = 0;
 let emTransicao = false;
 let cellsGrid = [];
 
-// 🔥 MODO DEV E MODAL DE LOG 🔥
+// MODO DEV
 let devMode = false, devTimer = null;
 let config = {
     lab: { mapW: 415, mapH: 897, mapX: -44, mapY: -156, playerScale: 2.3, rocketScale: 4.2 },
@@ -29,6 +29,7 @@ function startDevTimer() {
         const devContainer = document.getElementById('dev-container');
         if(devContainer) devContainer.classList.toggle('hidden', !devMode);
         document.body.classList.toggle('dev-mode-active', devMode);
+        
         if (devMode) {
             alert("🛠️ MODO DEV DESIGN ATIVADO!\nUse o botão DEV no topo para ajustar os elementos.");
             if (typeof atualizarMenuDev === 'function') atualizarMenuDev();
@@ -361,10 +362,18 @@ function desenharLab(avatarImg = 'assets/luis-frente.png') {
     avatarEl.style.backgroundImage = `url('${avatarImg}')`;
     avatarEl.style.left = (px * 33) + 'px'; avatarEl.style.top = (py * 33) + 'px';
 
+    // 🔥 BUGFIX: O loop do aplicarConfiguracoes foi removido daqui para tirar o lag! 🔥
+    avatarEl.style.transform = `scale(${config.lab.playerScale})`;
+    fogueteEl.style.transform = `scale(${config.lab.rocketScale})`;
+
     if(px === targetX && py === targetY) { 
-        tocarSom('sfx-vitoria'); document.getElementById('msg-vitoria-terra').classList.remove('hidden'); setTimeout(() => concluirPlaneta('terra', 2), 2500); 
+        // 🔥 BUGFIX: Delay suave de 150ms na mensagem para o boneco terminar de entrar no espaço 🔥
+        setTimeout(() => {
+            tocarSom('sfx-vitoria'); 
+            document.getElementById('msg-vitoria-terra').classList.remove('hidden'); 
+        }, 150);
+        setTimeout(() => concluirPlaneta('terra', 2), 2500); 
     } 
-    if (typeof aplicarConfiguracoes === 'function') aplicarConfiguracoes();
 }
 
 function moverLab(dx, dy) { 
@@ -375,154 +384,13 @@ function moverLab(dx, dy) {
     desenharLab(novaImagem); 
 }
 
-// 🔥 NOVO: LÓGICA DO BALDE DE TINTA (FLOOD FILL) 🔥
-function hexToRgba(hex) {
-    let r = parseInt(hex.slice(1,3), 16); let g = parseInt(hex.slice(3,5), 16); let b = parseInt(hex.slice(5,7), 16); return [r, g, b, 255];
-}
+// 🔥 BALDE DE TINTA APRIMORADO CONTRA VAZAMENTOS 🔥
+let cachedBounds = null; 
 
-function preencherCor(startX, startY, corHex) {
-    const c = document.getElementById('paintCanvas');
+function prepararBaldeDeTinta() {
     const img = document.getElementById('img-para-colorir');
+    const c = document.getElementById('paintCanvas');
+    if(!img || !c) return;
     
-    // Canvas temporário invisível para ler onde estão as linhas pretas da arte
-    const offC = document.createElement('canvas');
-    offC.width = c.width; offC.height = c.height;
-    const offCtx = offC.getContext('2d', {willReadFrequently: true});
-    offCtx.drawImage(img, 0, 0, c.width, c.height);
-
-    const imgData = ctxP.getImageData(0, 0, c.width, c.height);
-    const boundsData = offCtx.getImageData(0, 0, c.width, c.height);
-    const pixels = imgData.data;
-    const bounds = boundsData.data;
-    
-    let targetC = hexToRgba(corHex);
-    let sIdx = (startY * c.width + startX) * 4;
-    let sr = pixels[sIdx], sg = pixels[sIdx+1], sb = pixels[sIdx+2];
-
-    // Impede loop infinito se já for da mesma cor
-    if (sr === targetC[0] && sg === targetC[1] && sb === targetC[2]) return;
-
-    let stack = [[startX, startY]];
-    
-    // Função para identificar se bateu numa linha preta da arte
-    const isBoundary = (idx) => {
-        let luma = (bounds[idx]*0.299) + (bounds[idx+1]*0.587) + (bounds[idx+2]*0.114);
-        return (bounds[idx+3] > 100 && luma < 120); // Se a linha não for transparente e for escura = Barreira
-    };
-
-    // Função Scanline Flood Fill para desempenho mobile
-    while(stack.length > 0) {
-        let [x, y] = stack.pop();
-        let idx = (y * c.width + x) * 4;
-
-        if (pixels[idx] !== sr || pixels[idx+1] !== sg || pixels[idx+2] !== sb || isBoundary(idx)) continue;
-
-        let leftX = x;
-        while (leftX >= 0) {
-            let tempIdx = (y * c.width + leftX) * 4;
-            if (pixels[tempIdx] !== sr || pixels[tempIdx+1] !== sg || pixels[tempIdx+2] !== sb || isBoundary(tempIdx)) break;
-            leftX--;
-        }
-        leftX++;
-
-        let rightX = x;
-        while (rightX < c.width) {
-            let tempIdx = (y * c.width + rightX) * 4;
-            if (pixels[tempIdx] !== sr || pixels[tempIdx+1] !== sg || pixels[tempIdx+2] !== sb || isBoundary(tempIdx)) break;
-            rightX++;
-        }
-        rightX--;
-
-        for (let i = leftX; i <= rightX; i++) {
-            let fIdx = (y * c.width + i) * 4;
-            pixels[fIdx] = targetC[0]; pixels[fIdx+1] = targetC[1]; pixels[fIdx+2] = targetC[2]; pixels[fIdx+3] = 255;
-            
-            if (y > 0) {
-                let uIdx = ((y - 1) * c.width + i) * 4;
-                if (pixels[uIdx] === sr && !isBoundary(uIdx)) stack.push([i, y - 1]);
-            }
-            if (y < c.height - 1) {
-                let dIdx = ((y + 1) * c.width + i) * 4;
-                if (pixels[dIdx] === sr && !isBoundary(dIdx)) stack.push([i, y + 1]);
-            }
-        }
-    }
-    ctxP.putImageData(imgData, 0, 0);
-    salvarEstadoPintura();
-}
-
-/* FUNÇÕES GERAIS DE PINTURA ATUALIZADAS */
-function redimensionarCanvas() { 
-    const c = document.getElementById('paintCanvas'); 
-    ctxP = c.getContext('2d', {willReadFrequently: true}); 
-    c.width = c.offsetWidth; c.height = c.offsetHeight; 
-    ctxP.fillStyle = "white"; ctxP.fillRect(0,0,c.width,c.height); 
-    salvarEstadoPintura(); 
-    
-    // Evita duplicar touch events no mobile ao entrar de novo na tela
-    if(!c.dataset.listenerOn) {
-        c.addEventListener('touchstart', e => { 
-            e.preventDefault(); 
-            const r=c.getBoundingClientRect(); 
-            const tx = Math.floor(e.touches[0].clientX-r.left);
-            const ty = Math.floor(e.touches[0].clientY-r.top);
-            
-            if(toolP==='sticker') { 
-                ctxP.globalAlpha=1; ctxP.font="40px Arial"; ctxP.fillText(stickerSel, tx-20, ty+20); salvarEstadoPintura(); return; 
-            }
-            
-            if(toolP==='balde') {
-                preencherCor(tx, ty, corP); return;
-            }
-
-            drawP=true; ctxP.beginPath(); ctxP.moveTo(tx, ty); 
-        }, {passive: false}); 
-
-        c.addEventListener('touchmove', e => { 
-            if(!drawP || toolP==='sticker' || toolP==='balde') return; 
-            e.preventDefault(); const r=c.getBoundingClientRect(); 
-            ctxP.lineTo(e.touches[0].clientX-r.left, e.touches[0].clientY-r.top); 
-            ctxP.strokeStyle=toolP==='borracha'?'white':corP; 
-            ctxP.lineWidth=document.getElementById('slider-peso').value; 
-            ctxP.lineCap='round'; ctxP.stroke(); 
-        }, {passive: false}); 
-
-        c.addEventListener('touchend', () => { 
-            if(drawP) { drawP=false; salvarEstadoPintura(); }
-        });
-        c.dataset.listenerOn = "1";
-    }
-}
-
-function salvarEstadoPintura() { const c = document.getElementById('paintCanvas'); historicoPintura.push(c.toDataURL()); if (historicoPintura.length > 20) historicoPintura.shift(); }
-function desfazerPintura() { const c = document.getElementById('paintCanvas'); if (historicoPintura.length > 0) { historicoPintura.pop(); ctxP.fillStyle = "white"; ctxP.fillRect(0, 0, c.width, c.height); if (historicoPintura.length > 0) { let imgData = historicoPintura[historicoPintura.length - 1]; let img = new Image(); img.src = imgData; img.onload = () => ctxP.drawImage(img, 0, 0); } } }
-function limparPintura() { const c = document.getElementById('paintCanvas'); ctxP.fillStyle = "white"; ctxP.fillRect(0, 0, c.width, c.height); historicoPintura = []; salvarEstadoPintura(); }
-function salvarArte() { const c = document.getElementById('paintCanvas'); const tempCanvas = document.createElement('canvas'); tempCanvas.width = c.width; tempCanvas.height = c.height; const tCtx = tempCanvas.getContext('2d'); tCtx.drawImage(c, 0, 0); tCtx.globalCompositeOperation = 'multiply'; const imgFundo = document.getElementById('img-para-colorir'); tCtx.drawImage(imgFundo, 0, 0, tempCanvas.width, tempCanvas.height); const link = document.createElement('a'); link.download = 'arte-espacial-luis.png'; link.href = tempCanvas.toDataURL('image/png'); link.click(); }
-
-function mudarCor(c, el) { 
-    corP=c; 
-    document.querySelectorAll('.balde-tinta').forEach(b => b.classList.remove('selecionado')); 
-    el.classList.add('selecionado'); 
-    if (toolP !== 'balde') setTool('pincel'); 
-}
-
-function setTool(t) { toolP=t; document.querySelectorAll('.ferramenta-btn').forEach(b=>b.classList.remove('ativo')); const btn = document.getElementById('btn-'+t); if(btn) btn.classList.add('ativo'); }
-function toggleStickers() { document.getElementById('menu-stickers').classList.toggle('hidden'); }
-function addSticker(s) { toolP='sticker'; stickerSel=s; toggleStickers(); }
-function concluirPintura() { tocarSom('sfx-vitoria'); document.getElementById('msg-vitoria-venus').classList.remove('hidden'); setTimeout(() => concluirPlaneta('venus', 6), 2500); }
-
-/* MEMÓRIA E CAÇA PALAVRAS MANTIDOS IGUAIS */
-function iniciarMemoria() { memBloqueio = true; primeiraCarta = null; segundaCarta = null; paresAchados = 0; const grade = document.getElementById('grade-cartas'); grade.innerHTML = ''; grade.style.gridTemplateColumns = `repeat(4, 80px)`; let b = [...bancoMem].sort(() => Math.random() - 0.5).slice(0, 8); let j = [...b, ...b].sort(() => Math.random() - 0.5); j.forEach(img => { const c = document.createElement('div'); c.className = 'carta'; c.dataset.img = img; c.innerHTML = `<div class="face frente"></div><div class="face verso"><img src="${img}"></div>`; c.onclick = () => virarMem(c); grade.appendChild(c); }); setTimeout(() => memBloqueio = false, 300); }
-function virarMem(c) { if(memBloqueio || c === primeiraCarta || c.classList.contains('virada')) return; c.classList.add('virada'); if(!primeiraCarta) { primeiraCarta = c; return; } segundaCarta = c; memBloqueio = true; if(primeiraCarta.dataset.img === segundaCarta.dataset.img) { setTimeout(() => { primeiraCarta.classList.add('acerto'); segundaCarta.classList.add('acerto'); setTimeout(() => { primeiraCarta.classList.add('escondida'); segundaCarta.classList.add('escondida'); paresAchados++; if(paresAchados === 8) { tocarSom('sfx-vitoria'); document.getElementById('msg-vitoria-saturno').classList.remove('hidden'); setTimeout(() => concluirPlaneta('saturno', 8), 3000); } memBloqueio = false; primeiraCarta = null; segundaCarta = null; }, 400); }, 300); } else { setTimeout(() => { primeiraCarta.classList.add('erro'); segundaCarta.classList.add('erro'); setTimeout(() => { primeiraCarta.classList.remove('virada', 'erro'); segundaCarta.classList.remove('virada', 'erro'); memBloqueio = false; primeiraCarta = null; segundaCarta = null; }, 600); }, 500); } }
-
-const palavrasJupiter = ["LUIS", "FELIPE", "ASTRONAUTA", "FOGUETE", "ESPACO", "TERRA"];
-let palavrasEncontradas = [];
-function iniciarJupiter() { palavrasEncontradas = []; document.getElementById('msg-vitoria-jupiter').classList.add('hidden'); const l = document.getElementById('lista-jupiter'); l.innerHTML = ''; palavrasJupiter.forEach(p => { const div = document.createElement('div'); div.className = 'palavra-item'; div.id = 'list-' + p; div.innerText = p; l.appendChild(div); }); gerarGridJupiter(); }
-function gerarGridJupiter() { const g = document.getElementById('grid-jupiter'); g.innerHTML = ''; const grid = Array(12).fill().map(() => Array(12).fill('')); palavrasJupiter.forEach(p => { let inserida = false; while(!inserida) { let d = [[0,1],[1,0],[1,1],[1,-1],[0,-1],[-1,0],[-1,-1],[-1,1]][Math.floor(Math.random()*8)]; let x = Math.floor(Math.random()*12), y = Math.floor(Math.random()*12); if(p.split('').every((l,i) => { let nx=x+i*d[0], ny=y+i*d[1]; return nx>=0 && nx<12 && ny>=0 && ny<12 && (grid[ny][nx]==='' || grid[ny][nx]===l); })) { p.split('').forEach((l,i) => grid[y+i*d[1]][x+i*d[0]] = l); inserida = true; } } }); const abc = "ABCDEGHJKLMNOPQRSTUVWXYZ"; for(let y=0; y<12; y++) for(let x=0; x<12; x++) { if(grid[y][x] === '') grid[y][x] = abc[Math.floor(Math.random()*abc.length)]; const box = document.createElement('div'); box.className = 'letra-box'; box.innerText = grid[y][x]; box.dataset.x = x; box.dataset.y = y; box.addEventListener('touchstart', e => { e.preventDefault(); startLetra = box; box.classList.add('selecionada'); }); box.addEventListener('touchmove', e => { const touch = e.touches[0]; const t = document.elementFromPoint(touch.clientX, touch.clientY); if(t && t.classList.contains('letra-box')) { document.querySelectorAll('.letra-box.selecionada').forEach(b => b.classList.remove('selecionada')); getLinhaLetras(startLetra, t).forEach(c => c.classList.add('selecionada')); } }); box.addEventListener('touchend', () => { const sel = document.querySelectorAll('.letra-box.selecionada'); let pStr = Array.from(sel).map(b => b.innerText).join(''); let pRev = pStr.split('').reverse().join(''); let encontrada = palavrasJupiter.includes(pStr) ? pStr : (palavrasJupiter.includes(pRev) ? pRev : ""); if(encontrada && !palavrasEncontradas.includes(encontrada)) { palavrasEncontradas.push(encontrada); sel.forEach(b => { b.classList.remove('selecionada'); b.classList.add('marcada'); }); let itemLista = document.getElementById('list-' + encontrada); if(itemLista) itemLista.classList.add('encontrada'); if(palavrasEncontradas.length === palavrasJupiter.length) { tocarSom('sfx-vitoria'); document.getElementById('msg-vitoria-jupiter').classList.remove('hidden'); setTimeout(() => concluirPlaneta('jupiter', 10), 3000); } } document.querySelectorAll('.letra-box.selecionada').forEach(b => b.classList.remove('selecionada')); }); g.appendChild(box); } }
-function getLinhaLetras(s, e) { let x1 = parseInt(s.dataset.x), y1 = parseInt(s.dataset.y), x2 = parseInt(e.dataset.x), y2 = parseInt(e.dataset.y); let dx = Math.sign(x2 - x1), dy = Math.sign(y2 - y1); if(dx !== 0 && dy !== 0 && Math.abs(x2-x1) !== Math.abs(y2-y1)) return [s]; let cells = [], cx = x1, cy = y1; while(cx !== x2 + dx || cy !== y2 + dy) { let t = document.querySelector(`.letra-box[data-x="${cx}"][data-y="${cy}"]`); if(t) cells.push(t); if(cx === x2 && cy === y2) break; cx += dx; cy += dy; } return cells; }
-
-window.onload = () => {
-    gerarEstruturaLab(); 
-    mostrarTela('tela-inicial');
-    if (typeof aplicarConfiguracoes === 'function') aplicarConfiguracoes();
-};
+    // Tenta burlar o sistema de segurança se estiver local, mas como está no Vercel não é mais problema!
+        
