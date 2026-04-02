@@ -32,10 +32,10 @@
             <h1 id="texto-fim">FIM</h1>
             <img src="assets/titulo.png" class="img-titulo" id="titulo-principal">
             <img src="assets/luis-pulando.png" class="avatar-inicial">
+            
             <img src="assets/iniciar.png" class="btn-iniciar-img" id="btn-iniciar" 
-                 onmousedown="startDevTimer()" onmouseup="clearDevTimer()" onmouseleave="clearDevTimer()"
-                 ontouchstart="startDevTimer()" ontouchend="clearDevTimer()" 
-                 onclick="iniciarComHistoria()">
+                 onmousedown="iniciarPress(event)" onmouseup="cancelarPress(event)" onmouseleave="cancelarPress(event)"
+                 ontouchstart="iniciarPress(event)" ontouchend="cancelarPress(event)">
         </section>
 
         <section id="tela-planetas" class="screen hidden">
