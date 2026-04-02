@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aventura no Espaço - Luís Felipe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-inicial">
+
+    <div id="fade-overlay"></div>
+
+    <div id="game-container">
+        
+        <audio id="bg-music" loop><source src="assets/musica.mp3" type="audio/mpeg"></audio>
+        <audio id="sfx-vitoria" src="assets/vitoria.mp3" preload="auto"></audio>
+        <audio id="sfx-foguete" src="assets/foguete.wav" preload="auto"></audio>
+        
+        <button id="btn-mute" onclick="toggleMute()">🔊</button>
+
+        <div id="history-overlay" onclick="interagirHistoria()"><img src="" id="history-img" class="comic-in"></div>
+
+        <div id="dev-container" class="hidden">
+            <button id="btn-dev-toggle" onclick="toggleDevMenu()">🛠️ DEV</button>
+            <div id="dev-menu" class="collapsed">
+                <div id="dev-controls-dinamico"></div>
+            </div>
+        </div>
+
+        <section id="tela-inicial" class="screen active">
+            <h1 id="texto-fim">FIM</h1>
+            <img src="assets/titulo.png" class="img-titulo" id="titulo-principal">
+            <img src="assets/luis-pulando.png" class="avatar-inicial">
+            <img src="assets/iniciar.png" class="btn-iniciar-img" id="btn-iniciar" 
+                 onmousedown="startDevTimer()" onmouseup="clearDevTimer()" onmouseleave="clearDevTimer()"
+                 ontouchstart="startDevTimer()" ontouchend="clearDevTimer()" 
+                 onclick="iniciarComHistoria()">
+        </section>
+
+        <section id="tela-planetas" class="screen hidden">
+            <img src="assets/btn-back.png" class="btn-voltar-fixo" onclick="mostrarTela('tela-inicial')">
+            <div class="mapa-espacial" id="mapa-area">
+                <img src="assets/foguete.png" id="foguete-viajante">
+                <img src="assets/bandeira.png" id="b-terra" class="obj-fixo">
+                <img src="assets/bandeira.png" id="b-marte" class="obj-fixo">
+                <img src="assets/bandeira.png" id="b-venus" class="obj-fixo">
+                <img src="assets/bandeira.png" id="b-saturno" class="obj-fixo">
+                <img src="assets/bandeira.png" id="b-jupiter" class="obj-fixo">
+
+                <div class="planeta" id="p-terra" style="top:65.8%; left:20.3%; width:330px; height:330px;"><img src="assets/terra.png" class="img-planeta" onclick="jogar('terra')"></div>
+                <div class="nome-fixo" id="n-terra" style="top:76.9%; left:19.5%;">Terra</div>
+                
+                <div class="planeta bloqueado" id="p-marte" style="top:31.9%; left:18.4%; width:208px; height:208px;"><img src="assets/marte.png" class="img-planeta" onclick="jogar('marte')"></div>
+                <div class="nome-fixo" id="n-marte" style="top:39.6%; left:17.7%;">Marte</div>
+                
+                <div class="planeta bloqueado" id="p-venus" style="top:49.4%; left:58.9%; width:229px; height:229px;"><img src="assets/venus.png" class="img-planeta" onclick="jogar('venus')"></div>
+                <div class="nome-fixo" id="n-venus" style="top:58%; left:58.7%;">Vênus</div>
+                
+                <div class="planeta bloqueado" id="p-saturno" style="top:75.2%; left:71.7%; width:294px; height:294px;"><img src="assets/saturno.png" class="img-planeta" onclick="jogar('saturno')"></div>
+                <div class="nome-fixo" id="n-saturno" style="top:85.6%; left:72.2%;">Saturno</div>
+                
+                <div class="planeta bloqueado" id="p-jupiter" style="top:20.3%; left:72%; width:427px; height:427px;"><img src="assets/jupiter.png" class="img-planeta" onclick="jogar('jupiter')"></div>
+                <div class="nome-fixo" id="n-jupiter" style="top: 34.5%; left: 73%;">Júpiter</div>
+            </div>
+        </section>
+
+        <section id="tela-labirinto" class="screen hidden">
+            <img src="assets/btn-back.png" class="btn-voltar-fixo" onclick="voltarParaMapa()" style="z-index:9000;">
+            <div id="container-labirinto-jogo">
+                
+                <div id="tabuleiro-labirinto">
+                    <img src="assets/mapa-estilizado.png" id="mapa-calibracao">
+                </div>
+                
+                <div class="controles-grade">
+                    <div></div><button class="btn-seta" onclick="moverLab(0,-1)"><span>⬆️</span></button><div></div>
+                    <button class="btn-seta" onclick="moverLab(-1,0)"><span>⬅️</span></button>
+                    <button class="btn-seta" onclick="moverLab(0,1)"><span>⬇️</span></button>
+                    <button class="btn-seta" onclick="moverLab(1,0)"><span>➡️</span></button>
+                </div>
+            </div>
+            <div id="msg-vitoria-terra" class="msg-vitoria hidden" style="z-index: 9000;"><h2>PARABÉNS,<br>ESTAMOS PRONTOS A EXPLORAÇÃO ESPACIAL!</h2></div>
+        </section>
+
+        <section id="tela-erros" class="screen hidden">
+            <img src="assets/btn-back.png" class="btn-voltar-fixo" onclick="voltarParaMapa()">
+            <h2 style="margin-bottom:10px">ACHE OS 7 ERROS!</h2>
+            <div class="container-erros">
+                <div class="caixa-imagem"><img src="assets/sem-erro.png"></div>
+                <div class="caixa-imagem" id="area-erros" style="position:relative"><img src="assets/com-erro.png">
+                    <div class="hitbox" style="top:41%; left:10%;" onclick="marcarErro(this)"></div><div class="hitbox" style="top:18%; left:63%;" onclick="marcarErro(this)"></div><div class="hitbox" style="top:43%; left:40%;" onclick="marcarErro(this)"></div><div class="hitbox" style="top:73%; left:42%;" onclick="marcarErro(this)"></div><div class="hitbox" style="top:50%; left:75%;" onclick="marcarErro(this)"></div><div class="hitbox" style="top:61%; left:54%;" onclick="marcarErro(this)"></div><div class="hitbox" style="top:66%; left:84%;" onclick="marcarErro(this)"></div>
+                </div>
+            </div>
+            <div id="msg-vitoria-marte" class="msg-vitoria hidden"><h2>Incrível!!!<br>Você tem olhos de águia</h2></div>
+        </section>
+
+                <section id="tela-colorir" class="screen hidden">
+            <img src="assets/btn-back.png" class="btn-voltar-fixo" onclick="voltarParaMapa()">
+            <div class="container-colorir"><canvas id="paintCanvas"></canvas><img src="assets/colorir.png" id="img-para-colorir"></div>
+            <div class="toolbar-pintura">
+                <div style="display:flex; gap:8px; align-items: center; justify-content: center; width: 100%;">
+                    <input type="color" id="cor-personalizada" value="#f44336" onchange="mudarCor(this.value, this)" style="width: 35px; height: 35px; border: none; border-radius: 5px; cursor: pointer;">
+                    <div class="balde-tinta selecionado" style="background:#f44336" onclick="mudarCor('#f44336', this)"></div>
+                    <div class="balde-tinta" style="background:#2196f3" onclick="mudarCor('#2196f3', this)"></div>
+                    <div class="balde-tinta" style="background:#4caf50" onclick="mudarCor('#4caf50', this)"></div>
+                    <div class="balde-tinta" style="background:#ffeb3b" onclick="mudarCor('#ffeb3b', this)"></div>
+                    <div class="balde-tinta" style="background:#ffffff" onclick="mudarCor('#ffffff', this)"></div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap; justify-content: center;">
+                    <input type="range" id="slider-peso" min="1" max="40" value="10" style="width:70px">
+                    <button class="ferramenta-btn ativo" id="btn-pincel" onclick="setTool('pincel')">🖌️ Pincel</button>
+                    <button class="ferramenta-btn" id="btn-balde" onclick="setTool('balde')">🪣 Balde</button>
+                    <button class="ferramenta-btn" id="btn-borracha" onclick="setTool('borracha')">🧼 Borracha</button>
+                    <button class="ferramenta-btn" onclick="toggleStickers()">⭐ Stickers</button>
+                </div>
+                <div style="display:flex; gap:10px; margin-top: 5px;">
+                    <button class="acao-btn" onclick="desfazerPintura()">↩️ Desfazer</button>
+                    <button class="acao-btn" onclick="limparPintura()">🗑️ Limpar</button>
+                    <button class="acao-btn" onclick="salvarArte()">💾 Salvar</button>
+                </div>
+                <button class="btn-terminei" onclick="concluirPintura()">✅ Terminei!</button>
+            </div>
+            <div id="menu-stickers" class="hidden">
+                <button class="sticker-option" onclick="addSticker('🚀')">🚀</button>
+                <button class="sticker-option" onclick="addSticker('⭐')">⭐</button>
+                <button class="sticker-option" onclick="addSticker('✨')">✨</button>
+                <button class="sticker-option" onclick="addSticker('👽')">👽</button>
+                <button class="sticker-option" onclick="addSticker('🌕')">🌕</button>
+            </div>
+            <div id="msg-vitoria-venus" class="msg-vitoria hidden"><h2>SUA ARTE É DIGNA DE UM ASTRONAUTA!</h2></div>
+        </section>
+        
+        <section id="tela-memoria" class="screen hidden">
+            <img src="assets/btn-back.png" class="btn-voltar-fixo" onclick="voltarParaMapa()">
+            <h2 style="margin-bottom:15px; font-size: 2.2rem;">Jogo da Memória</h2>
+            <div class="grade-memoria" id="grade-cartas"></div>
+            <div id="msg-vitoria-saturno" class="msg-vitoria hidden"><h2>Uau!<br>Que memória excelente.</h2></div>
+        </section>
+
+        <section id="tela-jupiter" class="screen hidden">
+            <img src="assets/btn-back.png" class="btn-voltar-fixo" onclick="voltarParaMapa()">
+            <h2 style="margin-bottom:10px">Caça-Palavras</h2>
+            <div class="lista-palavras" id="lista-jupiter"></div>
+            <div class="grid-caca-palavras" id="grid-jupiter"></div>
+            <div id="msg-vitoria-jupiter" class="msg-vitoria hidden"><h2>Fantástico!<br>Completou a Aventura.</h2></div>
+        </section>
+
+        <div id="dev-log-modal" class="hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(6, 11, 25, 0.95); border: 3px solid #ffcc00; padding: 20px; z-index: 10000; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; color: white; box-shadow: 0 0 50px rgba(0,0,0,1);">
+            <h3 style="color: #ffcc00; margin-bottom: 10px;">💾 MUDANÇAS SALVAS!</h3>
+            <p style="font-size: 12px; margin-bottom: 10px;">Copie o código abaixo e envie para o desenvolvedor:</p>
+            <textarea id="dev-log-text" style="width: 100%; height: 200px; background: black; color: #0f0; font-family: monospace; font-size: 13px; padding: 10px; border: 1px solid #444; border-radius: 8px;" readonly></textarea>
+            <br>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                <button onclick="copiarLogDev()" style="padding: 10px 15px; background: #2ecc71; border: none; border-radius: 5px; color: white; font-weight: bold; cursor: pointer; flex: 1;">📋 COPIAR</button>
+                <button onclick="fecharLogDev()" style="padding: 10px 15px; background: #e74c3c; border: none; border-radius: 5px; color: white; font-weight: bold; cursor: pointer; flex: 1;">❌ FECHAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
