@@ -10,7 +10,9 @@ let paginaAtual = 0;
 let emTransicao = false;
 let cellsGrid = [];
 
-// 🔥 MODO DEV E CONTROLES BLINDADOS DO BOTÃO INICIAR 🔥
+// 🔥 ESCUDO CONTRA CLIQUES FANTASMAS (Bug do botão Iniciar) 🔥
+let delayClickHistoria = false;
+
 let devMode = false, devTimer = null;
 let isPressing = false;
 let touchTrigged = false;
@@ -28,11 +30,11 @@ let config = {
 
 function iniciarPress(e) {
     if (e.type === 'touchstart') touchTrigged = true;
-    if (e.type === 'mousedown' && touchTrigged) return; // Evita duplo evento no mobile
+    if (e.type === 'mousedown' && touchTrigged) return; 
     
     isPressing = true;
     devTimer = setTimeout(() => {
-        isPressing = false; // Se estourou 5s, não é mais um clique rápido
+        isPressing = false; 
         devMode = !devMode;
         const devContainer = document.getElementById('dev-container');
         if(devContainer) devContainer.classList.toggle('hidden', !devMode);
@@ -57,11 +59,10 @@ function cancelarPress(e) {
 
     clearTimeout(devTimer);
     
-    // Se isPressing ainda é true, o usuário soltou ANTES dos 5s! (É um clique para Iniciar)
     if (isPressing && (e.type === 'mouseup' || e.type === 'touchend')) {
         iniciarComHistoria();
     }
-    isPressing = false; // Reseta por segurança
+    isPressing = false; 
 }
 
 
@@ -159,9 +160,8 @@ function tocarSom(id) {
     if (isMuted) return;
     const som = document.getElementById(id);
     if (som) {
-        const clone = som.cloneNode();
-        clone.volume = som.volume;
-        let playPromise = clone.play();
+        som.currentTime = 0; 
+        let playPromise = som.play();
         if (playPromise !== undefined) {
             playPromise.catch(e => console.log("Áudio bloqueado pelo navegador", e));
         }
@@ -195,8 +195,10 @@ function fecharHistoria() {
     }, 500);
 }
 
+// 🔥 BUGFIX: O "delayClickHistoria" ignora aquele clique fantasma do celular 🔥
 function interagirHistoria() {
-    if (emTransicao) return;
+    if (delayClickHistoria || emTransicao) return;
+    
     if (paginaAtual >= 11 && paginaAtual < 14) {
         emTransicao = true;
         const img = document.getElementById('history-img');
@@ -238,6 +240,10 @@ function finalizarJogo() {
 }
 
 function iniciarComHistoria() {
+    // Ativa o escudo de 500ms para evitar pulo de página acidental
+    delayClickHistoria = true;
+    setTimeout(() => { delayClickHistoria = false; }, 500); 
+    
     mostrarTela('tela-planetas');
     const bgMusic = document.getElementById('bg-music');
     if (bgMusic && !isMuted) bgMusic.play().catch(e => console.log("Áudio aguardando interação"));
@@ -335,16 +341,23 @@ function voltarParaMapa() {
     mostrarTela('tela-planetas');
 }
 
-/* JOGO DO LABIRINTO */
+/* 🔥 BUGFIX: O ponto 'E' foi restaurado para a coluna certa (x=8) para o foguete aparecer ali! 🔥 */
 const mapaLab = [
-    ['0','0','0','0','0','0','0','0','0','0'],['1','0','1','1','0','1','0','1','1','0'],
-    ['0','0','0','1','0','0','0','0','0','0'],['1','0','1','1','0','1','1','1','1','0'],
-    ['0','0','1','0','0','0','0','0','0','0'],['1','1','0','0','1','1','1','0','1','1'],
-    ['0','0','0','1','0','0','0','0','0','0'],['0','1','1','1','0','1','1','1','1','0'],
-    ['0','0','0','0','0','0','0','0','1','0'],['0','1','0','1','1','0','1','1','0','0'],
-    ['0','1','0','0','0','0','0','0','0','1'],['1','1','0','1','1','1','1','1','1','0'],
-    ['0','0','0','1','0','0','0','0','0','0'],['0','1','1','1','0','1','1','1','1','0'],
-    ['0','0','0','0','0','1','E','0','0','0']
+    ['0','0','0','0','0','0','0','0','0','0'],
+    ['1','0','1','1','0','1','0','1','1','0'],
+    ['0','0','0','1','0','0','0','0','0','0'],
+    ['1','0','1','1','0','1','1','1','1','0'],
+    ['0','0','1','0','0','0','0','0','0','0'],
+    ['1','1','0','0','1','1','1','0','1','1'],
+    ['0','0','0','1','0','0','0','0','0','0'],
+    ['0','1','1','1','0','1','1','1','1','0'],
+    ['0','0','0','0','0','0','0','0','1','0'],
+    ['0','1','0','1','1','0','1','1','0','0'],
+    ['0','1','0','0','0','0','0','0','0','1'],
+    ['1','1','0','1','1','1','1','1','1','0'],
+    ['0','0','0','1','0','0','0','0','0','0'],
+    ['0','1','1','1','0','1','1','1','1','0'],
+    ['0','0','0','0','0','1','0','0','E','0']
 ];
 
 function gerarEstruturaLab() {
@@ -377,19 +390,32 @@ function desenharLab(avatarImg = 'assets/luis-frente.png') {
 
     let fogueteEl = document.getElementById('final-rocket');
     if (!fogueteEl) {
-        fogueteEl = document.createElement('div'); fogueteEl.id = 'final-rocket'; fogueteEl.className = 'chegada-icon'; board.appendChild(fogueteEl);
+        fogueteEl = document.createElement('div'); 
+        fogueteEl.id = 'final-rocket'; 
+        fogueteEl.className = 'chegada-icon'; 
+        board.appendChild(fogueteEl);
     }
-    fogueteEl.style.left = (targetX * 33) + 'px'; fogueteEl.style.top = (targetY * 33) + 'px';
+    
+    // 🔥 FORÇANDO O TAMANHO E O BACKGROUND NO JAVASCRIPT POR SEGURANÇA 🔥
+    fogueteEl.style.width = '32px'; fogueteEl.style.height = '32px';
+    fogueteEl.style.backgroundImage = "url('assets/foguete.png')";
+    fogueteEl.style.left = (targetX * 33) + 'px'; 
+    fogueteEl.style.top = (targetY * 33) + 'px';
+    fogueteEl.style.transform = `scale(${config.lab.rocketScale})`;
 
     let avatarEl = document.getElementById('player-avatar');
     if (!avatarEl) {
-        avatarEl = document.createElement('div'); avatarEl.id = 'player-avatar'; avatarEl.className = 'jogador-icon'; board.appendChild(avatarEl);
+        avatarEl = document.createElement('div'); 
+        avatarEl.id = 'player-avatar'; 
+        avatarEl.className = 'jogador-icon'; 
+        board.appendChild(avatarEl);
     }
+    
+    avatarEl.style.width = '32px'; avatarEl.style.height = '32px';
     avatarEl.style.backgroundImage = `url('${avatarImg}')`;
-    avatarEl.style.left = (px * 33) + 'px'; avatarEl.style.top = (py * 33) + 'px';
-
+    avatarEl.style.left = (px * 33) + 'px'; 
+    avatarEl.style.top = (py * 33) + 'px';
     avatarEl.style.transform = `scale(${config.lab.playerScale})`;
-    fogueteEl.style.transform = `scale(${config.lab.rocketScale})`;
 
     if(px === targetX && py === targetY) { 
         setTimeout(() => {
@@ -408,7 +434,7 @@ function moverLab(dx, dy) {
     desenharLab(novaImagem); 
 }
 
-// 🔥 BALDE DE TINTA APRIMORADO 🔥
+
 let cachedBounds = null; 
 
 function prepararBaldeDeTinta() {
