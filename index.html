@@ -4,12 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Portal - Aventura no Espaço</title>
+    
+    <script>
+        // Verifica se está rodando dentro de um WebView (App Android) ou PWA (Adicionado à Tela Inicial)
+        let isApp = navigator.userAgent.includes('wv') || 
+                    navigator.userAgent.includes('WebView') || 
+                    window.matchMedia('(display-mode: standalone)').matches;
+        
+        // Se for o aplicativo, pula o portal e vai direto para o jogo sem o usuário nem ver!
+        if (isApp) {
+            window.location.replace("jogo.html");
+        }
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;900&display=swap" rel="stylesheet">
     <style>
         body { 
             margin: 0; padding: 0; 
             background-color: #060b19; 
-            /* Se quiser puxar a imagem de fundo do seu projeto: */
             background-image: url('assets/fundo.png');
             background-size: cover; 
             background-position: center; 
@@ -55,8 +67,7 @@
         
         <a href="jogo.html" class="btn-opcao btn-web">🌍 JOGAR AGORA</a>
         
-        <a href="https://web2app-pro.appcollection.in/downloads/10435_AVENTURANOESPAO.apk" 
-        class="btn-opcao btn-app">📱 BAIXAR O APP</a>
+        <a href="https://web2app-pro.appcollection.in/downloads/10435_AVENTURANOESPAO.apk" class="btn-opcao btn-app">📱 BAIXAR O APP</a>
     </div>
 
 </body>
