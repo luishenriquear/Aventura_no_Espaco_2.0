@@ -4,7 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Portal - Aventura no Espaço</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;900&display=swap" rel="stylesheet">
+    
+    <script>
+        let isApp = navigator.userAgent.includes('wv') || 
+                    navigator.userAgent.includes('WebView') || 
+                    window.matchMedia('(display-mode: standalone)').matches;
+        
+        // Se for o aplicativo, pula o portal e vai direto para o jogo
+        if (isApp) {
+            window.location.replace("index.html");
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
         body { 
             margin: 0; padding: 0; 
@@ -16,21 +28,28 @@
             font-family: 'Fredoka', sans-serif; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             height: 100dvh; text-align: center; 
+            position: relative;
         }
         .caixa-portal { 
             background: rgba(6, 11, 25, 0.85); 
-            padding: 30px 20px; 
+            padding: 25px 20px; 
             border-radius: 20px; 
             border: 3px solid #ffcc00; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
             width: 90%; max-width: 400px; 
             display: flex; flex-direction: column; align-items: center;
+            z-index: 10;
         }
-        h1 { color: #ffcc00; text-shadow: 2px 2px 0 #0a1f55; margin-bottom: 5px; font-size: 2rem; line-height: 1.1; }
-        p { margin-bottom: 25px; font-size: 1.1rem; color: #e0e0e0; }
+        h1 { color: #ffcc00; text-shadow: 2px 2px 0 #0a1f55; margin-bottom: 5px; font-size: 1.8rem; line-height: 1.1; }
+        p { margin-bottom: 20px; font-size: 1.1rem; color: #e0e0e0; }
         
-        .img-logo { width: 150px; margin-bottom: -10px; z-index: 2; animation: flutuar 3s infinite alternate ease-in-out; }
-        @keyframes flutuar { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+        /* Animações de flutuação em ritmos diferentes para dar profundidade */
+        @keyframes flutuarTitulo { from { transform: translateY(0px); } to { transform: translateY(-10px); } }
+        @keyframes flutuarAvatar { from { transform: translateY(-10px); } to { transform: translateY(5px); } }
+
+        /* Imagens flutuantes */
+        .img-titulo-portal { width: 85%; max-width: 320px; margin-bottom: 0px; z-index: 2; animation: flutuarTitulo 3s infinite alternate ease-in-out; }
+        .img-logo { width: 140px; margin-bottom: -15px; z-index: 2; animation: flutuarAvatar 4s infinite alternate ease-in-out; }
 
         .btn-opcao { 
             display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -40,21 +59,38 @@
             box-shadow: 0 5px 0px rgba(0,0,0,0.3);
         }
         .btn-web { background: #3498db; border: 3px solid #1e3a8a; box-shadow: 0 5px 0 #1e3a8a; }
-        .btn-app { background: #2ecc71; border: 3px solid #145a32; box-shadow: 0 5px 0 #145a32; margin-bottom: 15px;}
+        .btn-app { background: #2ecc71; border: 3px solid #145a32; box-shadow: 0 5px 0 #145a32; margin-bottom: 10px;}
         .btn-opcao:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0,0,0,0.3) !important; }
+
+        /* Rodapé de Créditos */
+        .rodape {
+            position: absolute;
+            bottom: 15px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            line-height: 1.4;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
 
+    <img src="assets/titulo.png" class="img-titulo-portal" alt="Uma Aventura no Espaço">
     <img src="assets/luis-pulando.png" class="img-logo" alt="Luís Felipe">
     
     <div class="caixa-portal">
-        <h1>BEM-VINDO À AVENTURA!</h1>
+        <h1>BEM-VINDO!</h1>
         <p>Escolha como deseja jogar:</p>
         
         <a href="index.html" class="btn-opcao btn-web">🌍 JOGAR AGORA</a>
-        
         <a href="https://web2app-pro.appcollection.in/downloads/10435_AVENTURANOESPAO.apk" class="btn-opcao btn-app">📱 BAIXAR O APP</a>
+    </div>
+
+    <div class="rodape">
+        &copy; Aventura no Espaço 2026<br>
+        Desenvolvido por L.H.A.R.
     </div>
 
 </body>
