@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal - Aventura no Espaço</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;900&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            margin: 0; padding: 0; 
+            background-color: #060b19; 
+            /* Se quiser puxar a imagem de fundo do seu projeto: */
+            background-image: url('assets/fundo.png');
+            background-size: cover; 
+            background-position: center; 
+            color: white; 
+            font-family: 'Fredoka', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            height: 100dvh; text-align: center; 
+        }
+        .caixa-portal { 
+            background: rgba(6, 11, 25, 0.85); 
+            padding: 30px 20px; 
+            border-radius: 20px; 
+            border: 3px solid #ffcc00; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
+            width: 90%; max-width: 400px; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        h1 { color: #ffcc00; text-shadow: 2px 2px 0 #0a1f55; margin-bottom: 5px; font-size: 2rem; line-height: 1.1; }
+        p { margin-bottom: 25px; font-size: 1.1rem; color: #e0e0e0; }
+        
+        .img-logo { width: 150px; margin-bottom: -10px; z-index: 2; animation: flutuar 3s infinite alternate ease-in-out; }
+        @keyframes flutuar { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+
+        .btn-opcao { 
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 18px; margin: 8px 0; 
+            border-radius: 50px; text-decoration: none; color: white; 
+            font-size: 1.2rem; font-weight: 900; transition: transform 0.1s; 
+            box-shadow: 0 5px 0px rgba(0,0,0,0.3);
+        }
+        .btn-web { background: #3498db; border: 3px solid #1e3a8a; box-shadow: 0 5px 0 #1e3a8a; }
+        .btn-app { background: #2ecc71; border: 3px solid #145a32; box-shadow: 0 5px 0 #145a32; margin-bottom: 15px;}
+        .btn-opcao:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0,0,0,0.3) !important; }
+    </style>
+</head>
+<body>
+
+    <img src="assets/luis-pulando.png" class="img-logo" alt="Luís Felipe">
+    
+    <div class="caixa-portal">
+        <h1>BEM-VINDO À AVENTURA!</h1>
+        <p>Escolha como deseja jogar:</p>
+        
+        <a href="index.html" class="btn-opcao btn-web">🌍 JOGAR AGORA</a>
+        
+        <a href="https://web2app-pro.appcollection.in/downloads/10435_AVENTURANOESPAO.apk" 
+        class="btn-opcao btn-app">📱 BAIXAR O APP</a>
+    </div>
+
+</body>
+</html>
