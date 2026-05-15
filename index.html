@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sinal Perdido - Aventura no Espaço</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;900&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            margin: 0; padding: 0; 
+            background-color: #060b19; 
+            background-image: url('assets/fundo.png');
+            background-size: cover; 
+            background-position: center; 
+            color: white; 
+            font-family: 'Fredoka', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            height: 100dvh; text-align: center; 
+        }
+        .caixa-erro { 
+            background: rgba(6, 11, 25, 0.9); 
+            padding: 40px 25px; 
+            border-radius: 20px; 
+            border: 3px solid #e74c3c; /* Borda vermelha de alerta */
+            box-shadow: 0 10px 40px rgba(231, 76, 60, 0.4); 
+            width: 90%; max-width: 400px; 
+            display: flex; flex-direction: column; align-items: center;
+            z-index: 10;
+        }
+        .erro-codigo {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #e74c3c;
+            margin: 0;
+            line-height: 1;
+            text-shadow: 4px 4px 0 #0a1f55;
+        }
+        h1 { color: #ffcc00; text-shadow: 2px 2px 0 #0a1f55; margin-bottom: 15px; font-size: 1.8rem; line-height: 1.2; margin-top: 10px;}
+        p { margin-bottom: 0; font-size: 1.1rem; color: #e0e0e0; line-height: 1.4; }
+        
+        .aviso-breve {
+            margin-top: 20px;
+            font-weight: 900;
+            color: #3498db;
+            background: rgba(52, 152, 219, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        /* Avatar flutuando com um tom um pouco mais escuro para dar ideia de offline */
+        .img-logo { width: 140px; margin-bottom: -20px; z-index: 2; animation: flutuarAvatar 4s infinite alternate ease-in-out; filter: brightness(0.7); }
+        @keyframes flutuarAvatar { from { transform: translateY(-10px); } to { transform: translateY(10px); } }
+
+    </style>
+</head>
+<body>
+
+    <img src="assets/luis-pulando.png" class="img-logo" alt="Luís Felipe">
+    
+    <div class="caixa-erro">
+        <p class="erro-codigo">404</p>
+        <h1>SINAL PERDIDO!</h1>
+        <p>A base espacial está passando por manutenções no momento. O jogo está temporariamente indisponível.</p>
+        <p class="aviso-breve">Voltaremos em breve! 🚀</p>
+    </div>
+
+</body>
+</html>
